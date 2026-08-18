@@ -43,11 +43,20 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     report = outcome.get_result()
 
-    # Only handle real test body failures
-    if report.when != "call" or not report.failed:
+    # Handle both test body failures and fixture setup failures (e.g. a page
+    # object's assert_loaded() failing inside the home_page/login_page fixtures)
+    if report.when not in ("setup", "call") or not report.failed:
         return
 
+    # On a fixture setup failure (e.g. home_page.assert_loaded() raising),
+    # `page` was already resolved successfully but pytest hasn't recorded it
+    # in item.funcargs yet — fall back to the cached fixture value directly.
     page = item.funcargs.get("page")
+    if page is None:
+        try:
+            page = item._request.getfixturevalue("page")
+        except Exception:
+            page = None
     if not page:
         return
 
