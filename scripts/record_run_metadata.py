@@ -16,6 +16,7 @@ def main() -> None:
     parser.add_argument("--build", required=True, type=int)
     parser.add_argument("--trigger", required=True, help="GitHub event_name, e.g. workflow_dispatch")
     parser.add_argument("--suite", default="")
+    parser.add_argument("--keep", type=int, default=None, help="Keep only the last N entries")
     args = parser.parse_args()
 
     meta_in = Path(args.meta_in)
@@ -30,6 +31,8 @@ def main() -> None:
         "suite": args.suite or "smoke",
     })
     entries.sort(key=lambda e: e["build"])
+    if args.keep is not None:
+        entries = entries[-args.keep:]
 
     Path(args.meta_out).write_text(json.dumps(entries, indent=2))
 
