@@ -28,6 +28,9 @@ jobs:
       TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
       TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
       TEST_NAME: ${{ secrets.TEST_NAME }}
+      # How many past Allure reports to keep published on gh-pages. Keeps the
+      # branch (and GitHub's Pages deploy time) from growing unbounded.
+      KEEP_REPORTS: "5"
 
     steps:
       - uses: actions/checkout@v4
@@ -67,12 +70,12 @@ jobs:
           path: artifacts/screenshots
           retention-days: 14
 
-      # Publish a browsable Allure report to GitHub Pages. Skipped for plain
-      # PR runs so that in-progress feature-branch results never overwrite the
-      # public report — only workflow_dispatch (and any future push-to-main
-      # trigger) publish.
+      # Build the browsable Allure report for every run (including PRs) so a
+      # failure's root cause is visible without needing to run allure serve
+      # locally on the raw results. Reading gh-pages history here is safe on
+      # PRs too — it's read-only and just seeds the trend graphs.
       - name: Checkout gh-pages history
-        if: always() && github.event_name != 'pull_request'
+        if: always()
         uses: actions/checkout@v4
         continue-on-error: true
         with:
@@ -80,41 +83,56 @@ jobs:
           path: gh-pages
 
       - name: Build Allure report with history
-        if: always() && github.event_name != 'pull_request'
+        if: always()
         uses: simple-elf/allure-report-action@master
         with:
           allure_results: artifacts/allure-results
           gh_pages: gh-pages
           allure_report: allure-report
           allure_history: allure-history
+          keep_reports: ${{ env.KEEP_REPORTS }}
 
+      - name: Upload Allure HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+          retention-days: 14
+
+      # Publishing to the public GitHub Pages site (and the runs.html summary
+      # page) is manual-only — no point re-publishing on every PR push, and
+      # in-progress feature-branch results should never overwrite the public
+      # report.
       - name: Fix allure-history ownership
         # simple-elf/allure-report-action runs in a Docker container as root,
         # so it leaves allure-history/ root-owned on the runner. Later steps
         # run as the normal runner user and need to read/write it.
-        if: always() && github.event_name != 'pull_request'
+        if: always() && github.event_name == 'workflow_dispatch'
         run: sudo chown -R "$(id -u):$(id -g)" allure-history
 
       - name: Record run metadata
-        if: always() && github.event_name != 'pull_request'
+        if: always() && github.event_name == 'workflow_dispatch'
         run: |
           python3 scripts/record_run_metadata.py \
             --meta-in gh-pages/runs-meta.json \
             --meta-out allure-history/runs-meta.json \
             --build "${{ github.run_number }}" \
             --trigger "${{ github.event_name }}" \
-            --suite "${{ inputs.suite }}"
+            --suite "${{ inputs.suite }}" \
+            --keep "${{ env.KEEP_REPORTS }}"
 
       - name: Generate runs index page
-        if: always() && github.event_name != 'pull_request'
+        if: always() && github.event_name == 'workflow_dispatch'
         run: |
           python3 scripts/generate_runs_index.py \
             "allure-history/${{ github.run_number }}/history/history-trend.json" \
             allure-history/runs-meta.json \
-            allure-history/runs.html
+            allure-history/runs.html \
+            --keep "${{ env.KEEP_REPORTS }}"
 
       - name: Publish report to GitHub Pages
-        if: always() && github.event_name != 'pull_request'
+        if: always() && github.event_name == 'workflow_dispatch'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

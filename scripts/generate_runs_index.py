@@ -5,9 +5,12 @@ Joins Allure's own accumulated history-trend.json (pass/fail counts per
 build, already tracked across builds via the gh-pages history mechanism)
 with our own runs-meta.json (date/trigger/suite, accumulated the same way)
 and renders a simple table linking to each run's report, newest first.
+
+--keep should match the allure-report-action keep_reports setting, so we
+never link to a report folder that's already been pruned from disk.
 """
+import argparse
 import json
-import sys
 from pathlib import Path
 
 
@@ -65,19 +68,23 @@ def render(runs: list[dict], meta_by_build: dict[int, dict]) -> str:
 
 
 def main() -> None:
-    if len(sys.argv) != 4:
-        print(
-            "Usage: generate_runs_index.py <history-trend.json> <runs-meta.json> <output.html>",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("trend_path", type=Path)
+    parser.add_argument("meta_path", type=Path)
+    parser.add_argument("output_path", type=Path)
+    parser.add_argument("--keep", type=int, default=None, help="Only list the last N builds")
+    args = parser.parse_args()
 
-    trend_path, meta_path, output_path = (Path(p) for p in sys.argv[1:4])
-    runs = json.loads(trend_path.read_text())
-    meta_entries = json.loads(meta_path.read_text()) if meta_path.exists() else []
+    runs = json.loads(args.trend_path.read_text())
+    if args.keep is not None:
+        # history-trend.json is newest-first; keep only what's still published
+        # on disk (older report folders get pruned by keep_reports).
+        runs = runs[: args.keep]
+
+    meta_entries = json.loads(args.meta_path.read_text()) if args.meta_path.exists() else []
     meta_by_build = {e["build"]: e for e in meta_entries}
 
-    output_path.write_text(render(runs, meta_by_build))
+    args.output_path.write_text(render(runs, meta_by_build))
 
 
 if __name__ == "__main__":
