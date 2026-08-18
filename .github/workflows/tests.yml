@@ -17,6 +17,9 @@ on:
           - ui
           - all
 
+permissions:
+  contents: write
+
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -63,3 +66,32 @@ jobs:
           name: failure-screenshots
           path: artifacts/screenshots
           retention-days: 14
+
+      # Publish a browsable Allure report to GitHub Pages. Skipped for plain
+      # PR runs so that in-progress feature-branch results never overwrite the
+      # public report — only workflow_dispatch (and any future push-to-main
+      # trigger) publish.
+      - name: Checkout gh-pages history
+        if: always() && github.event_name != 'pull_request'
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Build Allure report with history
+        if: always() && github.event_name != 'pull_request'
+        uses: simple-elf/allure-report-action@master
+        with:
+          allure_results: artifacts/allure-results
+          gh_pages: gh-pages
+          allure_report: allure-report
+          allure_history: allure-history
+
+      - name: Publish report to GitHub Pages
+        if: always() && github.event_name != 'pull_request'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
