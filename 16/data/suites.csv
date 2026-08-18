@@ -1,0 +1,6 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","203","Login fails with invalid credentials: test_34543@gmail.com","tests.ui","2026-08-18","passed","2026-08-18","","test_login","",""
+"","222","Login fails with invalid credentials: nobody-here@example.com","tests.ui","2026-08-18","passed","2026-08-18","","test_login","",""
+"","598","Login succeeds with valid credentials","tests.ui","2026-08-18","passed","2026-08-18","","test_login","",""
+"","240","Login fails with invalid credentials: wrong@example.com","tests.ui","2026-08-18","passed","2026-08-18","","test_login","",""
+"Verify that a Home Page can be opened","8","Home Page opening","tests.ui","2026-08-18","passed","2026-08-18","","test_home_page","",""
