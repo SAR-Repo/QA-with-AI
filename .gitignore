@@ -1,0 +1,27 @@
+# Личное — только для меня, в репозиторий не пушим
+PERSONAL-GUIDE.md
+START-HERE.md
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.idea/
+.vscode/
+
+# Тестовые артефакты
+artifacts/
+logs/
+allure-results/
+allure-report/
+playwright-report/
+
+# Секреты
+config/credentials.yaml
+.env
