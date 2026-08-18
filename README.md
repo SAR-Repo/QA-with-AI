@@ -1,13 +1,13 @@
 # QA Portfolio
 
-QA automation framework на Python — pytest + Playwright + Allure. В разработке (портфолио, строится по фазам).
+QA automation framework in Python — pytest + Playwright + Allure. Work in progress (portfolio, built in phases).
 
-## Требования
+## Requirements
 
 - Python 3.12+
-- [Allure commandline](https://allurereport.org/docs/install/) — для просмотра отчётов (`brew install allure` на macOS)
+- [Allure commandline](https://allurereport.org/docs/install/) — for viewing reports (`brew install allure` on macOS)
 
-## Установка
+## Installation
 
 ```bash
 python -m venv .venv
@@ -16,24 +16,24 @@ pip install -r requirements-dev.txt
 playwright install chromium
 ```
 
-## Запуск тестов
+## Running tests
 
-Запускать **из корня проекта** (см. `pytest.ini` — там же лежит конфиг).
+Run **from the project root** (see `pytest.ini` — the config lives there too).
 
 ```bash
 pytest
 ```
 
-## Отчёт в Allure
+## Allure report
 
 ```bash
 pytest --alluredir=artifacts/allure-results
-allure serve artifacts/allure-results   # поднимет локальный сервер и откроет отчёт в браузере
+allure serve artifacts/allure-results   # starts a local server and opens the report in the browser
 ```
 
-Для статического HTML-отчёта (например, для CI) вместо `allure serve`:
+For a static HTML report (e.g. for CI) instead of `allure serve`:
 ```bash
 allure generate artifacts/allure-results -o artifacts/allure-report --clean
 ```
 
-> Если запускаешь тесты через IDE (например PyCharm) — проверь, что working directory для pytest-конфигураций указывает на корень проекта, иначе `artifacts/` создастся не там.
+> If you run tests from an IDE (e.g. PyCharm), check that the working directory for pytest configurations points to the project root, otherwise `artifacts/` will be created in the wrong place.
