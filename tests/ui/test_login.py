@@ -2,8 +2,10 @@ import pytest
 import allure
 
 # Метки/фича для всего файла
+# regression suite = полный набор, smoke — его подмножество для быстрых прогонов
 pytestmark = [
     pytest.mark.ui,
+    pytest.mark.regression,
     allure.feature("Login"),
 ]
 
