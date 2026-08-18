@@ -95,11 +95,22 @@ jobs:
         if: always() && github.event_name != 'pull_request'
         run: sudo chown -R "$(id -u):$(id -g)" allure-history
 
+      - name: Record run metadata
+        if: always() && github.event_name != 'pull_request'
+        run: |
+          python3 scripts/record_run_metadata.py \
+            --meta-in gh-pages/runs-meta.json \
+            --meta-out allure-history/runs-meta.json \
+            --build "${{ github.run_number }}" \
+            --trigger "${{ github.event_name }}" \
+            --suite "${{ inputs.suite }}"
+
       - name: Generate runs index page
         if: always() && github.event_name != 'pull_request'
         run: |
           python3 scripts/generate_runs_index.py \
             "allure-history/${{ github.run_number }}/history/history-trend.json" \
+            allure-history/runs-meta.json \
             allure-history/runs.html
 
       - name: Publish report to GitHub Pages
