@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 """Generate a static HTML page listing published Allure report runs.
 
-Reads Allure's own accumulated history-trend.json (already tracked across
-builds via the gh-pages history mechanism) and renders a simple table
-linking to each run's report, newest first.
+Joins Allure's own accumulated history-trend.json (pass/fail counts per
+build, already tracked across builds via the gh-pages history mechanism)
+with our own runs-meta.json (date/trigger/suite, accumulated the same way)
+and renders a simple table linking to each run's report, newest first.
 """
 import json
 import sys
 from pathlib import Path
 
 
-def render(runs: list[dict]) -> str:
+def render(runs: list[dict], meta_by_build: dict[int, dict]) -> str:
     rows = []
     for run in runs:
+        build = run["buildOrder"]
+        meta = meta_by_build.get(build, {})
         data = run["data"]
         passed = data["passed"]
         failed = data["failed"] + data["broken"]
@@ -21,7 +24,10 @@ def render(runs: list[dict]) -> str:
         label = "FAIL" if failed else "PASS"
         rows.append(f"""
         <tr>
-          <td><a href="{run['reportUrl']}">#{run['buildOrder']}</a></td>
+          <td><a href="{run['reportUrl']}">#{build}</a></td>
+          <td>{meta.get('date', '—')}</td>
+          <td>{meta.get('trigger', '—')}</td>
+          <td>{meta.get('suite', '—')}</td>
           <td><span class="badge {status}">{label}</span></td>
           <td>{passed}</td>
           <td>{failed}</td>
@@ -36,7 +42,7 @@ def render(runs: list[dict]) -> str:
 <style>
   body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 2rem; background: #0d1117; color: #c9d1d9; }}
   h1 {{ font-size: 1.4rem; }}
-  table {{ border-collapse: collapse; width: 100%; max-width: 640px; }}
+  table {{ border-collapse: collapse; width: 100%; max-width: 820px; }}
   th, td {{ text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #30363d; }}
   th {{ color: #8b949e; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }}
   a {{ color: #58a6ff; text-decoration: none; }}
@@ -49,7 +55,7 @@ def render(runs: list[dict]) -> str:
 <body>
 <h1>Test run history</h1>
 <table>
-<thead><tr><th>Build</th><th>Status</th><th>Passed</th><th>Failed</th><th>Total</th></tr></thead>
+<thead><tr><th>Build</th><th>Date</th><th>Trigger</th><th>Suite</th><th>Status</th><th>Passed</th><th>Failed</th><th>Total</th></tr></thead>
 <tbody>{"".join(rows)}
 </tbody>
 </table>
@@ -59,13 +65,19 @@ def render(runs: list[dict]) -> str:
 
 
 def main() -> None:
-    if len(sys.argv) != 3:
-        print("Usage: generate_runs_index.py <history-trend.json> <output.html>", file=sys.stderr)
+    if len(sys.argv) != 4:
+        print(
+            "Usage: generate_runs_index.py <history-trend.json> <runs-meta.json> <output.html>",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
-    trend_path, output_path = Path(sys.argv[1]), Path(sys.argv[2])
+    trend_path, meta_path, output_path = (Path(p) for p in sys.argv[1:4])
     runs = json.loads(trend_path.read_text())
-    output_path.write_text(render(runs))
+    meta_entries = json.loads(meta_path.read_text()) if meta_path.exists() else []
+    meta_by_build = {e["build"]: e for e in meta_entries}
+
+    output_path.write_text(render(runs, meta_by_build))
 
 
 if __name__ == "__main__":
