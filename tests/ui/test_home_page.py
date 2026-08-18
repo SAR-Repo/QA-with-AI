@@ -2,7 +2,7 @@ import pytest
 import allure
 
 # Python reserved variable
-# regression suite = полный набор, smoke — его подмножество для быстрых прогонов
+# regression suite = full set, smoke = its subset for fast runs
 pytestmark = [
     pytest.mark.ui,
     pytest.mark.regression,

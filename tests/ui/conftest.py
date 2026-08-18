@@ -4,7 +4,7 @@ from pathlib import Path
 
 from pages.home_page import HomePage
 from pages.login_page import LoginPage
-# Общие fixtures для всех тестов (api + ui) — заполняем в Фазе 1/2.
+# Shared fixtures for all tests (api + ui) — filled in during Phase 1/2.
 
 @pytest.fixture(scope="session")
 def browser(config):

@@ -1,4 +1,4 @@
-# Личное — только для меня, в репозиторий не пушим
+# Personal — for me only, not pushed to the repository
 PERSONAL-GUIDE.md
 START-HERE.md
 PROJECT-LOG.md
@@ -16,13 +16,13 @@ __pycache__/
 .idea/
 .vscode/
 
-# Тестовые артефакты
+# Test artifacts
 artifacts/
 logs/
 allure-results/
 allure-report/
 playwright-report/
 
-# Секреты
+# Secrets
 config/credentials.yaml
 .env
