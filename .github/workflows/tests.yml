@@ -1,0 +1,65 @@
+name: Tests
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: "Test suite to run"
+        required: true
+        default: smoke
+        type: choice
+        options:
+          - smoke
+          - regression
+          - api
+          - ui
+          - all
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    env:
+      HEADLESS: "true"
+      TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+      TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+      TEST_NAME: ${{ secrets.TEST_NAME }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-lock.txt
+          playwright install --with-deps chromium
+
+      - name: Run tests
+        run: |
+          SUITE="${{ inputs.suite }}"
+          SUITE="${SUITE:-smoke}"
+          if [ "$SUITE" = "all" ]; then
+            pytest --alluredir=artifacts/allure-results
+          else
+            pytest -m "$SUITE" --alluredir=artifacts/allure-results
+          fi
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: artifacts/allure-results
+          retention-days: 14
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-screenshots
+          path: artifacts/screenshots
+          retention-days: 14

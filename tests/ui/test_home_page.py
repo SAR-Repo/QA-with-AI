@@ -2,8 +2,10 @@ import pytest
 import allure
 
 # Python reserved variable
+# regression suite = полный набор, smoke — его подмножество для быстрых прогонов
 pytestmark = [
     pytest.mark.ui,
+    pytest.mark.regression,
     allure.feature("Home Page"),
     # allure.story("Home Page")
 ]
