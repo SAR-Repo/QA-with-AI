@@ -7,7 +7,15 @@ def config():
     config_path = Path(__file__).parent.parent / "config" / "env.yaml"
 
     with open(config_path) as f:
-        return yaml.safe_load(f)
+        cfg = yaml.safe_load(f)
+
+    # CI runners have no display, so headless must be forceable without
+    # editing env.yaml (which stays headless:false for local debugging).
+    headless_env = os.getenv("HEADLESS")
+    if headless_env is not None:
+        cfg["headless"] = headless_env.lower() == "true"
+
+    return cfg
 
 @pytest.fixture(scope="session")
 def credentials():
