@@ -43,16 +43,24 @@ jobs:
         with:
           python-version: "3.12"
 
-      # GitHub-hosted ubuntu-latest runners default to azure.archive.ubuntu.com,
-      # a mirror with well-documented flakiness — apt-get (invoked by the next
-      # step's `playwright install --with-deps`) can retry it for many minutes
-      # before falling back to archive.ubuntu.com on its own. Point apt at the
-      # reliable mirror directly instead of waiting that out. Covers both the
-      # classic sources.list and the deb822 ubuntu.sources format (Ubuntu 24.04).
+      # GitHub-hosted ubuntu-latest (24.04/noble) runners don't point apt at a
+      # literal URL — sources use the mirror+file scheme, resolving mirrors
+      # from /etc/apt/apt-mirrors.txt at update time, and azure.archive.ubuntu.com
+      # (one entry in that list) is flaky enough to stall apt-get for many
+      # minutes before it falls back on its own. The previous attempt at this
+      # fix sed'd sources.list/ubuntu.sources for a literal "azure.archive..."
+      # string, but that string only lives inside apt-mirrors.txt, not in the
+      # sources files themselves — so it silently did nothing. Bypass the
+      # mirrorlist indirection entirely: point the URIs straight at a single
+      # reliable host instead of azure.archive.ubuntu.com. The `cat` at the
+      # end is a deliberate diagnostic — confirm in the next run's log that
+      # the rewrite actually took effect before trusting this fix.
       - name: Work around flaky azure.archive.ubuntu.com apt mirror
         run: |
-          sudo sed -i 's|azure\.archive\.ubuntu\.com|archive.ubuntu.com|g' /etc/apt/sources.list 2>/dev/null || true
-          sudo sed -i 's|azure\.archive\.ubuntu\.com|archive.ubuntu.com|g' /etc/apt/sources.list.d/ubuntu.sources 2>/dev/null || true
+          sudo sed -i 's|mirror+file:/etc/apt/apt-mirrors.txt|http://archive.ubuntu.com/ubuntu/|g' /etc/apt/sources.list.d/ubuntu.sources 2>/dev/null || true
+          sudo sed -i 's|mirror://mirrors.ubuntu.com/mirrors.txt|http://archive.ubuntu.com/ubuntu/|g' /etc/apt/sources.list 2>/dev/null || true
+          echo "--- resulting apt sources ---"
+          cat /etc/apt/sources.list.d/ubuntu.sources 2>/dev/null || cat /etc/apt/sources.list
 
       - name: Install dependencies
         uses: nick-fields/retry@v3
