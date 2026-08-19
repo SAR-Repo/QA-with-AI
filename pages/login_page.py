@@ -19,6 +19,16 @@ class LoginPage:
             "Your email or password is incorrect!"
         )
 
+        # "New User Signup!" form (same /login page, next to the login form)
+        self.signup_name_input = page.locator('input[data-qa="signup-name"]')
+        self.signup_email_input = page.locator('input[data-qa="signup-email"]')
+        self.signup_button = page.locator('button[data-qa="signup-button"]')
+
+        # Error shown when signing up with an already-registered email
+        self.signup_error_message = page.get_by_text(
+            "Email Address already exist!"
+        )
+
     def is_loaded(self) -> bool:
         """Verify that the login form is visible."""
         return self.heading.is_visible()
@@ -37,3 +47,9 @@ class LoginPage:
     def get_error_message(self) -> str:
         """Return the text of the login error message."""
         return self.error_message.inner_text()
+
+    def signup(self, name: str, email: str):
+        """Fill name/email in the "New User Signup!" form and submit."""
+        self.signup_name_input.fill(name)
+        self.signup_email_input.fill(email)
+        self.signup_button.click()

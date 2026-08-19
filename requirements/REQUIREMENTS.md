@@ -19,7 +19,7 @@ Given a user on /login with a unique name and email entered in the "New User Sig
 
 ### REQ-002 — Duplicate email is rejected on signup
 
-Given a user tries to sign up on /login with an email address that is already registered, when they submit, then an error is shown, they remain on /login, and they are NOT navigated to /signup.
+Given a user tries to sign up on /login with an email address that is already registered, when they submit, then an "Email Address already exist!" error is shown and the account details form ("Enter Account Information") is never reached. Corrected 2026-08-19 during test automation: the browser URL actually changes to /signup, but the server re-renders the login/signup page with the error there rather than the account details form — verified against the live site, the original "stays on /login" wording was an unverified assumption and turned out to be inaccurate about the URL.
 
 ### REQ-003 — Account details page required fields
 
