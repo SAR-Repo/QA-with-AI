@@ -22,8 +22,14 @@
   title: Duplicate email is rejected on signup
   description: >
     Given a user tries to sign up on /login with an email address that is
-    already registered, when they submit, then an error is shown, they
-    remain on /login, and they are NOT navigated to /signup.
+    already registered, when they submit, then an "Email Address already
+    exist!" error is shown and the account details form ("Enter Account
+    Information") is never reached.
+    Corrected 2026-08-19 during test automation: the browser URL actually
+    changes to /signup, but the server re-renders the login/signup page
+    with the error there rather than the account details form — verified
+    against the live site, the original "stays on /login" wording was an
+    unverified assumption and turned out to be inaccurate about the URL.
   source_ticket: QWA-2
   priority: High
   status: active

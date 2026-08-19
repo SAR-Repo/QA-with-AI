@@ -4,12 +4,15 @@ allure-pytest==2.16.0
 allure-python-commons==2.16.0
 ast_serialize==0.8.0
 attrs==26.1.0
+certifi==2026.7.22
 cfgv==3.5.0
+charset-normalizer==3.5.1
 coverage==7.15.4
 distlib==0.4.3
 filelock==3.32.3
 greenlet==3.5.5
 identify==2.6.19
+idna==3.19
 iniconfig==2.3.0
 librt==0.15.0
 mypy==2.3.1
@@ -25,6 +28,8 @@ pyee==13.0.1
 pytest-cov==7.1.0
 pytest==9.1.1
 python-discovery==1.5.2
+requests==2.34.2
 ruff==0.16.3
 typing_extensions==4.16.0
+urllib3==2.7.0
 virtualenv==21.7.4
