@@ -1,0 +1,90 @@
+# Source of truth for functional requirements, extracted from Jira tickets
+# during the "Requirements Review" phase. See JIRA-AGENT-METHODOLOGY.md §4.
+#
+# Do not hand-edit `REQUIREMENTS.md` — it's generated from this file.
+
+- id: REQ-001
+  title: Signup entry point on the login page
+  description: >
+    Given a user on /login with a unique name and email entered in the
+    "New User Signup!" form, when they click Signup, then they are
+    navigated to the account details page (/signup) with name and email
+    carried over.
+  source_ticket: QWA-2
+  priority: High
+  status: active
+  supersedes: null
+  superseded_by: null
+  added_date: 2026-08-19
+  tags: [signup, ui]
+
+- id: REQ-002
+  title: Duplicate email is rejected on signup
+  description: >
+    Given a user tries to sign up on /login with an email address that is
+    already registered, when they submit, then an error is shown, they
+    remain on /login, and they are NOT navigated to /signup.
+  source_ticket: QWA-2
+  priority: High
+  status: active
+  supersedes: null
+  superseded_by: null
+  added_date: 2026-08-19
+  tags: [signup, ui, negative]
+
+- id: REQ-003
+  title: Account details page required fields
+  description: >
+    The /signup account details form must include: Title (Mr/Mrs),
+    Password, Date of birth (day/month/year dropdowns), and an address
+    block (first name, last name, address, country, state, city, zipcode,
+    mobile number). All of these are required for submission.
+  source_ticket: QWA-2
+  priority: High
+  status: active
+  supersedes: null
+  superseded_by: null
+  added_date: 2026-08-19
+  tags: [signup, ui]
+
+- id: REQ-004
+  title: Company and Address2 are optional
+  description: >
+    Given the /signup form, the Company and Address2 fields are optional —
+    account creation must succeed without them being filled.
+  source_ticket: QWA-2
+  priority: High
+  status: active
+  supersedes: null
+  superseded_by: null
+  added_date: 2026-08-19
+  tags: [signup, ui]
+
+- id: REQ-005
+  title: Newsletter/offers checkboxes are optional
+  description: >
+    The "Sign up for our newsletter!" and "Receive special offers from our
+    partners!" checkboxes are optional — account creation succeeds
+    regardless of their checked state.
+  source_ticket: QWA-2
+  priority: High
+  status: active
+  supersedes: null
+  superseded_by: null
+  added_date: 2026-08-19
+  tags: [signup, ui]
+
+- id: REQ-006
+  title: Successful signup logs the user in
+  description: >
+    Given all required /signup fields are filled correctly, when the user
+    submits, then an "Account Created!" confirmation is shown; when they
+    continue, they land on the home page already logged in (the header
+    shows their logged-in state).
+  source_ticket: QWA-2
+  priority: High
+  status: active
+  supersedes: null
+  superseded_by: null
+  added_date: 2026-08-19
+  tags: [signup, ui]
