@@ -23,6 +23,10 @@ permissions:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    # Safety net against a hung step (seen in practice: Install dependencies
+    # stuck for 45+ minutes instead of its usual ~30s) — GitHub's own default
+    # is 360 minutes, far too permissive to catch that kind of hang.
+    timeout-minutes: 20
     env:
       HEADLESS: "true"
       TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
@@ -40,9 +44,13 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements-lock.txt
-          playwright install --with-deps chromium
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 5
+          max_attempts: 3
+          command: |
+            pip install -r requirements-lock.txt
+            playwright install --with-deps chromium
 
       - name: Run tests
         run: |
