@@ -43,6 +43,17 @@ jobs:
         with:
           python-version: "3.12"
 
+      # GitHub-hosted ubuntu-latest runners default to azure.archive.ubuntu.com,
+      # a mirror with well-documented flakiness — apt-get (invoked by the next
+      # step's `playwright install --with-deps`) can retry it for many minutes
+      # before falling back to archive.ubuntu.com on its own. Point apt at the
+      # reliable mirror directly instead of waiting that out. Covers both the
+      # classic sources.list and the deb822 ubuntu.sources format (Ubuntu 24.04).
+      - name: Work around flaky azure.archive.ubuntu.com apt mirror
+        run: |
+          sudo sed -i 's|azure\.archive\.ubuntu\.com|archive.ubuntu.com|g' /etc/apt/sources.list 2>/dev/null || true
+          sudo sed -i 's|azure\.archive\.ubuntu\.com|archive.ubuntu.com|g' /etc/apt/sources.list.d/ubuntu.sources 2>/dev/null || true
+
       - name: Install dependencies
         uses: nick-fields/retry@v3
         with:
